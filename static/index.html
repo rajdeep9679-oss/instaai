@@ -198,32 +198,40 @@ nav{padding:10px 8px;flex:1;overflow-y:auto}
       <div id="saved-wrap" style="display:none">
         <div class="saved-title">Continue as</div>
         <div id="saved-list"></div>
-        <div class="auth-divider">or connect new account</div>
+        <div class="auth-divider">or add new account</div>
       </div>
 
-      <h2>Connect Instagram</h2>
-      <p>Click below to log in with your Instagram account securely via official Meta OAuth. Works for Business & Creator accounts.</p>
-
-      <button class="btn-ig" id="ig-btn" onclick="startOAuth()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-        Continue with Instagram
-      </button>
-
-      <div id="oauth-note" style="display:none;margin-top:14px;padding:12px;background:var(--surface2);border-radius:10px;font-size:12px;color:var(--muted);line-height:1.7">
-        <span class="loader"></span> Redirecting to Instagram login...
+      <!-- Tab switcher -->
+      <div style="display:flex;gap:2px;background:var(--surface2);border-radius:8px;padding:3px;margin-bottom:20px">
+        <div id="tab-token" style="flex:1;text-align:center;padding:7px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text)" onclick="switchTab('token')">Paste Token</div>
+        <div id="tab-oauth" style="flex:1;text-align:center;padding:7px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted)" onclick="switchTab('oauth')">OAuth Login</div>
       </div>
 
-      <div class="auth-steps">
-        <h3>Requirements</h3>
-        <div class="auth-step"><div class="auth-step-num">1</div>Instagram Business or Creator account</div>
-        <div class="auth-step"><div class="auth-step-num">2</div>Account linked to a Facebook Page</div>
-        <div class="auth-step"><div class="auth-step-num">3</div>That's it — secure OAuth, no password stored</div>
+      <!-- TOKEN LOGIN (default) -->
+      <div id="panel-token">
+        <h2 style="margin-bottom:6px">Connect with Access Token</h2>
+        <p>Paste your Instagram Graph API access token below. Get it free from Meta Developer portal.</p>
+        <input class="input" id="token-input" placeholder="Paste your access token here..." style="margin-bottom:12px;font-size:12px;font-family:monospace">
+        <button class="btn-ig" onclick="loginWithToken()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          Connect Instagram
+        </button>
+        <div class="auth-steps" style="margin-top:16px">
+          <h3>How to get your token (2 min)</h3>
+          <div class="auth-step"><div class="auth-step-num">1</div>Go to <strong style="color:var(--cyan)">developers.facebook.com</strong> → your aigrow app</div>
+          <div class="auth-step"><div class="auth-step-num">2</div>Click Instagram → API setup → Add account → log in</div>
+          <div class="auth-step"><div class="auth-step-num">3</div>Copy the generated token → paste it above</div>
+        </div>
       </div>
 
-      <div id="no-app-note" style="display:none;margin-top:16px;background:#f59e0b15;border:1px solid #f59e0b30;border-radius:10px;padding:14px;font-size:12px;color:var(--muted);line-height:1.8">
-        ⚙️ <strong style="color:var(--text)">Setup required:</strong> The app owner needs to configure Instagram OAuth.<br>
-        Add <code style="color:var(--cyan)">IG_APP_ID</code> and <code style="color:var(--cyan)">IG_APP_SECRET</code> in environment variables.<br>
-        Get them free at <strong style="color:var(--purple)">developers.facebook.com</strong>
+      <!-- OAUTH LOGIN -->
+      <div id="panel-oauth" style="display:none">
+        <h2 style="margin-bottom:6px">OAuth Login</h2>
+        <p>Log in via Facebook OAuth. Requires app setup and may show "Feature unavailable" on new apps.</p>
+        <button class="btn-ig" id="ig-btn" onclick="startOAuth()" style="margin-top:8px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          Continue with Instagram
+        </button>
       </div>
     </div>
   </div>
@@ -554,6 +562,29 @@ async function loadSavedAccounts() {
       </div>
       <span class="saved-arrow">→</span>
     </div>`).join('');
+}
+
+function switchTab(tab) {
+  document.getElementById('panel-token').style.display = tab==='token'?'block':'none';
+  document.getElementById('panel-oauth').style.display = tab==='oauth'?'block':'none';
+  document.getElementById('tab-token').style.background = tab==='token'?'var(--surface)':'transparent';
+  document.getElementById('tab-token').style.color = tab==='token'?'var(--text)':'var(--muted)';
+  document.getElementById('tab-oauth').style.background = tab==='oauth'?'var(--surface)':'transparent';
+  document.getElementById('tab-oauth').style.color = tab==='oauth'?'var(--text)':'var(--muted)';
+}
+
+async function loginWithToken() {
+  const token = document.getElementById('token-input').value.trim();
+  if (!token) { showAuthErr('Paste your access token first'); return; }
+  const btn = document.querySelector('#panel-token .btn-ig');
+  btn.disabled = true; btn.innerHTML = '<span class="loader"></span> Connecting...';
+  hideAuthErr();
+  try {
+    const result = await fetch('/api/auth/token', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token}),credentials:'include'}).then(r=>r.json());
+    if (result.success) { enterApp(result); }
+    else { showAuthErr(result.message || 'Invalid token'); }
+  } catch(e) { showAuthErr('Connection error'); }
+  btn.disabled = false; btn.innerHTML = '✦ Connect Instagram';
 }
 
 async function startOAuth() {
