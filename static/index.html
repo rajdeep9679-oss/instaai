@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>InstaAI — Instagram Growth Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#08080f;--surface:#101018;--surface2:#181824;--surface3:#1e1e2e;
+  --border:#ffffff0f;--border2:#ffffff18;
+  --purple:#a855f7;--pink:#ec4899;--cyan:#06b6d4;
+  --green:#10b981;--amber:#f59e0b;--red:#ef4444;
+  --text:#f0efff;--muted:#7c7a9a;--hint:#3a3a5a;
+  --grad:linear-gradient(135deg,#a855f7,#ec4899);
+}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── AUTH SCREEN ── */
+#auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:radial-gradient(ellipse at 30% 20%,#a855f715 0%,transparent 60%),
+              radial-gradient(ellipse at 70% 80%,#ec489910 0%,transparent 60%)}
+.auth-box{width:100%;max-width:420px}
+.auth-logo{text-align:center;margin-bottom:32px}
+.auth-logo-icon{width:64px;height:64px;background:var(--grad);border-radius:18px;display:inline-flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:12px;box-shadow:0 8px 32px #a855f740}
+.auth-title{font-size:28px;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.auth-sub{font-size:14px;color:var(--muted);margin-top:6px}
+.auth-card{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:32px;box-shadow:0 20px 60px #00000060}
+.auth-card h2{font-size:18px;font-weight:700;margin-bottom:6px}
+.auth-card p{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6}
+.btn-ig{width:100%;padding:14px;border-radius:12px;background:var(--grad);color:#fff;font-size:15px;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;transition:.15s;box-shadow:0 4px 20px #a855f740}
+.btn-ig:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 8px 28px #a855f760}
+.btn-ig:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:20px 0;font-size:12px;color:var(--hint)}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border2)}
+.auth-steps{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:20px}
+.auth-steps h3{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.auth-step{display:flex;gap:10px;margin-bottom:8px;font-size:12px;color:var(--muted);line-height:1.5}
+.auth-step-num{width:18px;height:18px;border-radius:50%;background:var(--grad);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.auth-error{background:#ef444415;border:1px solid #ef444430;border-radius:10px;padding:12px;font-size:13px;color:var(--red);margin-bottom:16px;display:none}
+.auth-saved{margin-bottom:20px}
+.saved-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.saved-account{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:.15s;margin-bottom:6px}
+.saved-account:hover{border-color:var(--purple);background:var(--surface3)}
+.saved-avatar{width:36px;height:36px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.saved-info{flex:1}.saved-name{font-size:13px;font-weight:600}.saved-handle{font-size:11px;color:var(--muted)}
+.saved-arrow{font-size:16px;color:var(--purple)}
+
+/* ── APP LAYOUT ── */
+#app{display:none;height:100vh;overflow:hidden}
+.layout{display:flex;height:100%}
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.logo{padding:20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.logo-icon{width:30px;height:30px;background:var(--grad);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.logo-text{font-size:15px;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+nav{padding:10px 8px;flex:1;overflow-y:auto}
+.nav-sec{font-size:10px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.08em;padding:10px 12px 5px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);transition:.15s;margin-bottom:2px;user-select:none}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:linear-gradient(135deg,#a855f720,#ec489920);color:var(--purple);border:1px solid #a855f728}
+.nav-icon{font-size:15px;width:16px;text-align:center}
+.account-bar{padding:12px;border-top:1px solid var(--border)}
+.cur-account{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:.15s}
+.cur-account:hover{border-color:var(--purple)}
+.ca-av{width:28px;height:28px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.ca-info{flex:1;min-width:0}
+.ca-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ca-handle{font-size:10px;color:var(--muted)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:14px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);flex-shrink:0}
+.topbar-title{font-size:17px;font-weight:700}
+.content{flex:1;overflow-y:auto;padding:20px}
+.page{display:none}.page.active{display:block}
+
+/* ── COMPONENTS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat.p::before{background:var(--grad)}.stat.c::before{background:linear-gradient(90deg,var(--cyan),var(--purple))}
+.stat.g::before{background:linear-gradient(90deg,var(--green),var(--cyan))}.stat.a::before{background:linear-gradient(90deg,var(--amber),var(--pink))}
+.stat-label{font-size:11px;color:var(--muted);margin-bottom:5px}
+.stat-val{font-size:24px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-title{font-size:13px;font-weight:700}
+.divider{height:1px;background:var(--border);margin:14px 0}
+.label{font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.inp,.sel,.ta{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:.15s}
+.inp:focus,.sel:focus,.ta:focus{border-color:var(--purple);box-shadow:0 0 0 3px #a855f718}
+.inp::placeholder,.ta::placeholder{color:var(--hint)}
+.ta{resize:vertical;min-height:75px;line-height:1.6}
+.sel{cursor:pointer}
+.fg{margin-bottom:13px}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.btn-p{background:var(--grad);color:#fff}.btn-p:hover{opacity:.85}
+.btn-g{background:transparent;border:1px solid var(--border2);color:var(--muted)}.btn-g:hover{background:var(--surface2);color:var(--text)}
+.btn-d{background:#ef444415;border:1px solid #ef444430;color:var(--red)}
+.btn-sm{padding:5px 11px;font-size:12px}.btn-full{width:100%;justify-content:center}
+.ai-box{background:linear-gradient(135deg,#a855f710,#ec489910);border:1px solid #a855f728;border-radius:10px;padding:14px;font-size:13px;line-height:1.7;white-space:pre-wrap;min-height:55px;margin-top:8px}
+.ai-badge{display:inline-flex;align-items:center;gap:4px;background:#a855f720;border:1px solid #a855f740;color:var(--purple);font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;margin-bottom:7px}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tag{background:var(--surface3);border:1px solid var(--border2);color:var(--cyan);font-size:11px;font-family:'JetBrains Mono',monospace;padding:3px 9px;border-radius:20px;cursor:pointer;transition:.15s}
+.tag:hover,.tag.on{background:#06b6d420;border-color:var(--cyan)}.tag.off{opacity:.3}
+.chip{background:var(--surface3);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-size:12px;cursor:pointer;transition:.15s}
+.chip.sel{background:#a855f720;border-color:var(--purple);color:var(--purple)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.post-row{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px;display:flex;align-items:center;gap:11px;margin-bottom:7px}
+.post-icon{width:38px;height:38px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.post-info{flex:1;min-width:0}
+.post-cap{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.post-meta{font-size:11px;color:var(--muted)}
+.badge{font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;flex-shrink:0}
+.badge.pending{background:#a855f720;color:var(--purple);border:1px solid #a855f740}
+.badge.posted{background:#10b98120;color:var(--green);border:1px solid #10b98140}
+.badge.failed{background:#ef444420;color:var(--red);border:1px solid #ef444440}
+.loader{display:inline-block;width:13px;height:13px;border:2px solid #ffffff20;border-top-color:var(--purple);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.muted{color:var(--muted);font-size:13px}
+
+/* location dropdown */
+.loc-wrap{position:relative}
+.loc-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border2);border-radius:10px;z-index:200;display:none;overflow:hidden;box-shadow:0 8px 28px #00000070;max-height:220px;overflow-y:auto}
+.loc-drop.open{display:block}
+.loc-item{padding:9px 13px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);display:flex;gap:8px}
+.loc-item:last-child{border-bottom:none}.loc-item:hover{background:var(--surface2)}
+.loc-name{font-weight:500}.loc-addr{font-size:11px;color:var(--muted);margin-top:1px}
+
+/* tab bar */
+.tabs{display:flex;gap:2px;background:var(--surface2);border-radius:8px;padding:3px;margin-bottom:14px}
+.tab{flex:1;text-align:center;padding:6px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);transition:.15s}
+.tab.active{background:var(--surface);color:var(--text)}
+
+/* bar chart */
+.bars{display:flex;align-items:flex-end;gap:5px;height:90px;margin:12px 0}
+.bar-w{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar{width:100%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--purple),#7c3aed)}
+.bar-l{font-size:10px;color:var(--muted)}
+
+/* idea card */
+.idea{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px;cursor:pointer;transition:.15s}
+.idea:hover{border-color:var(--purple);transform:translateY(-1px)}
+.idea-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.idea-type.reel{color:var(--pink)}.idea-type.post{color:var(--cyan)}.idea-type.story{color:var(--amber)}.idea-type.carousel{color:var(--green)}
+.idea-title{font-size:13px;font-weight:600;margin-bottom:3px}
+.idea-hook{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* profile */
+.profile-hdr{background:linear-gradient(135deg,#a855f712,#ec489910);border:1px solid #a855f728;border-radius:12px;padding:18px;display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.profile-av{width:52px;height:52px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0;overflow:hidden}
+.profile-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.pstats{display:flex;gap:18px;margin-top:7px}
+.pstat-v{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.pstat-l{font-size:10px;color:var(--muted)}
+
+/* media grid */
+.media-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.media-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;transition:.15s;text-decoration:none;display:block}
+.media-item:hover{border-color:var(--purple)}
+
+/* upload */
+.upload-z{border:2px dashed var(--border2);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:.15s;position:relative}
+.upload-z:hover{border-color:var(--purple);background:#a855f708}
+.upload-z input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+
+/* toast */
+.toasts{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:7px;z-index:9999}
+.toast{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:12px;display:flex;align-items:center;gap:9px;animation:tin .2s ease;min-width:220px;box-shadow:0 4px 16px #00000050}
+.toast.success{border-left:3px solid var(--green)}.toast.error{border-left:3px solid var(--red)}.toast.info{border-left:3px solid var(--purple)}
+@keyframes tin{from{transform:translateX(16px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* key status */
+.ks{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}
+.ks.ok{background:#10b98120;color:var(--green)}.ks.no{background:#ef444420;color:var(--red)}
+
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--hint);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ AUTH SCREEN ═══════════ -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">✦</div>
+      <div class="auth-title">InstaAI</div>
+      <div class="auth-sub">Instagram Growth Studio — AI-powered content & scheduling</div>
+    </div>
+    <div class="auth-card">
+      <div id="auth-err" class="auth-error"></div>
+
+      <!-- Saved accounts -->
+      <div id="saved-wrap" style="display:none">
+        <div class="saved-title">Continue as</div>
+        <div id="saved-list"></div>
+        <div class="auth-divider">or connect new account</div>
+      </div>
+
+      <h2>Connect Instagram</h2>
+      <p>Click below to log in with your Instagram account securely via official Meta OAuth. Works for Business & Creator accounts.</p>
+
+      <button class="btn-ig" id="ig-btn" onclick="startOAuth()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        Continue with Instagram
+      </button>
+
+      <div id="oauth-note" style="display:none;margin-top:14px;padding:12px;background:var(--surface2);border-radius:10px;font-size:12px;color:var(--muted);line-height:1.7">
+        <span class="loader"></span> Redirecting to Instagram login...
+      </div>
+
+      <div class="auth-steps">
+        <h3>Requirements</h3>
+        <div class="auth-step"><div class="auth-step-num">1</div>Instagram Business or Creator account</div>
+        <div class="auth-step"><div class="auth-step-num">2</div>Account linked to a Facebook Page</div>
+        <div class="auth-step"><div class="auth-step-num">3</div>That's it — secure OAuth, no password stored</div>
+      </div>
+
+      <div id="no-app-note" style="display:none;margin-top:16px;background:#f59e0b15;border:1px solid #f59e0b30;border-radius:10px;padding:14px;font-size:12px;color:var(--muted);line-height:1.8">
+        ⚙️ <strong style="color:var(--text)">Setup required:</strong> The app owner needs to configure Instagram OAuth.<br>
+        Add <code style="color:var(--cyan)">IG_APP_ID</code> and <code style="color:var(--cyan)">IG_APP_SECRET</code> in environment variables.<br>
+        Get them free at <strong style="color:var(--purple)">developers.facebook.com</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MAIN APP ═══════════ -->
+<div id="app">
+  <div class="layout">
+
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">✦</div>
+        <span class="logo-text">InstaAI</span>
+      </div>
+      <nav>
+        <div class="nav-sec">Overview</div>
+        <div class="nav-item active" onclick="nav('dashboard',this)"><span class="nav-icon">◈</span>Dashboard</div>
+        <div class="nav-item" onclick="nav('account',this)"><span class="nav-icon">◉</span>My Account</div>
+        <div class="nav-sec">Content</div>
+        <div class="nav-item" onclick="nav('create',this)"><span class="nav-icon">✦</span>AI Creator</div>
+        <div class="nav-item" onclick="nav('ideas',this)"><span class="nav-icon">◆</span>Content Ideas</div>
+        <div class="nav-item" onclick="nav('schedule',this)"><span class="nav-icon">◷</span>Scheduler</div>
+        <div class="nav-sec">Growth</div>
+        <div class="nav-item" onclick="nav('audience',this)"><span class="nav-icon">◈</span>Audience AI</div>
+        <div class="nav-item" onclick="nav('analytics',this)"><span class="nav-icon">▲</span>Analytics</div>
+        <div class="nav-sec">System</div>
+        <div class="nav-item" onclick="nav('settings',this)"><span class="nav-icon">⊙</span>Settings</div>
+      </nav>
+      <div class="account-bar">
+        <div class="cur-account" onclick="nav('settings',null)">
+          <div class="ca-av" id="sb-av">?</div>
+          <div class="ca-info">
+            <div class="ca-name" id="sb-name">Loading...</div>
+            <div class="ca-handle" id="sb-handle"></div>
+          </div>
+          <span style="font-size:10px;color:var(--muted)">⇅</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="topbar">
+        <span class="topbar-title" id="page-title">Dashboard</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="tb-handle" style="font-size:12px;color:var(--muted)"></span>
+          <button class="btn btn-p btn-sm" onclick="nav('create',null)">+ New Post</button>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <!-- DASHBOARD -->
+        <div class="page active" id="page-dashboard">
+          <div class="g4">
+            <div class="stat p"><div class="stat-label">Followers</div><div class="stat-val" id="s-flw">—</div><div class="stat-sub">your audience</div></div>
+            <div class="stat c"><div class="stat-label">Scheduled</div><div class="stat-val" id="s-sch">0</div><div class="stat-sub">upcoming posts</div></div>
+            <div class="stat g"><div class="stat-label">Published</div><div class="stat-val" id="s-pub">0</div><div class="stat-sub">via InstaAI</div></div>
+            <div class="stat a"><div class="stat-label">Total Posts</div><div class="stat-val" id="s-med">—</div><div class="stat-sub">on profile</div></div>
+          </div>
+          <div class="g2">
+            <div class="card">
+              <div class="sec-hdr"><span class="sec-title">Weekly Activity</span></div>
+              <div class="bars">
+                <div class="bar-w"><div class="bar" style="height:55%"></div><div class="bar-l">Mon</div></div>
+                <div class="bar-w"><div class="bar" style="height:80%"></div><div class="bar-l">Tue</div></div>
+                <div class="bar-w"><div class="bar" style="height:40%"></div><div class="bar-l">Wed</div></div>
+                <div class="bar-w"><div class="bar" style="height:95%"></div><div class="bar-l">Thu</div></div>
+                <div class="bar-w"><div class="bar" style="height:65%"></div><div class="bar-l">Fri</div></div>
+                <div class="bar-w"><div class="bar" style="height:50%"></div><div class="bar-l">Sat</div></div>
+                <div class="bar-w"><div class="bar" style="height:75%"></div><div class="bar-l">Sun</div></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="sec-hdr"><span class="sec-title">Upcoming Posts</span></div>
+              <div id="d-upcoming"><span class="loader"></span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="sec-hdr"><span class="sec-title">Best Times to Post Today</span><button class="btn btn-g btn-sm" onclick="loadBestTimes()">Refresh AI</button></div>
+            <div id="d-times"><span class="loader"></span></div>
+          </div>
+        </div>
+
+        <!-- ACCOUNT -->
+        <div class="page" id="page-account">
+          <div id="acc-profile"><span class="loader"></span></div>
+          <div class="card">
+            <div class="sec-hdr"><span class="sec-title">Recent Posts</span><button class="btn btn-g btn-sm" onclick="loadMedia()">Refresh</button></div>
+            <div id="acc-media"><span class="loader"></span></div>
+          </div>
+        </div>
+
+        <!-- AI CREATOR -->
+        <div class="page" id="page-create">
+          <div class="g2">
+            <div>
+              <div class="card">
+                <div class="sec-title" style="margin-bottom:14px">✦ AI Content Generator</div>
+                <div class="fg"><label class="label">Topic / Product</label><input class="inp" id="c-topic" placeholder="e.g. Morning skincare routine, new product launch..."></div>
+                <div class="fg"><label class="label">Content Type</label><select class="sel" id="c-type"><option>Feed Post</option><option>Reel</option><option>Story</option><option>Carousel</option></select></div>
+                <div class="fg">
+                  <label class="label">Tone</label>
+                  <div class="chips" id="tone-chips">
+                    <div class="chip sel" onclick="setTone(this,'engaging')">Engaging</div>
+                    <div class="chip" onclick="setTone(this,'funny')">Funny</div>
+                    <div class="chip" onclick="setTone(this,'inspirational')">Inspirational</div>
+                    <div class="chip" onclick="setTone(this,'professional')">Professional</div>
+                    <div class="chip" onclick="setTone(this,'casual')">Casual</div>
+                    <div class="chip" onclick="setTone(this,'luxury')">Luxury</div>
+                  </div>
+                </div>
+                <div class="fg"><label class="label">Target Audience</label><input class="inp" id="c-audience" placeholder="e.g. fitness enthusiasts 20-35..."></div>
+                <div class="fg"><label class="label">Niche</label><input class="inp" id="c-niche" placeholder="e.g. beauty, tech, food, fitness..."></div>
+                <div class="fg">
+                  <label class="label">Location Tag</label>
+                  <div class="loc-wrap">
+                    <input class="inp" id="c-loc" placeholder="Search location..." autocomplete="off" oninput="locSearch(this,'ld-create')">
+                    <div class="loc-drop" id="ld-create"></div>
+                  </div>
+                </div>
+                <button class="btn btn-p btn-full" onclick="genContent()">✦ Generate with AI</button>
+              </div>
+              <div class="card">
+                <div class="sec-title" style="margin-bottom:12px">Image URL</div>
+                <div class="fg"><label class="label">Paste a public image URL to post</label><input class="inp" id="c-imgurl" placeholder="https://example.com/photo.jpg"></div>
+                <div style="font-size:11px;color:var(--muted)">Must be a publicly accessible URL. Instagram fetches it directly.</div>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <div class="ai-badge">✦ AI Caption</div>
+                <div id="ai-cap" class="ai-box">Your caption will appear here...</div>
+                <button class="btn btn-g btn-sm" style="margin-top:8px" onclick="copy('ai-cap')">Copy</button>
+              </div>
+              <div class="card">
+                <div class="ai-badge">✦ AI Hashtags</div>
+                <div id="ai-htags" class="ai-box">
+                  <div id="tag-wrap" class="tags">Hashtags appear here — click to deselect...</div>
+                </div>
+                <button class="btn btn-g btn-sm" style="margin-top:8px" onclick="copyTags()">Copy Selected</button>
+              </div>
+              <div class="card">
+                <div class="sec-title" style="margin-bottom:12px">Schedule Post</div>
+                <div class="fg"><label class="label">Date & Time</label><input class="inp" type="datetime-local" id="c-time"></div>
+                <div style="display:flex;gap:8px">
+                  <button class="btn btn-p" style="flex:1" onclick="schedPost()">Schedule</button>
+                  <button class="btn btn-g" onclick="postNow()">Post Now</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- IDEAS -->
+        <div class="page" id="page-ideas">
+          <div class="card">
+            <div style="display:flex;gap:10px;align-items:flex-end">
+              <div style="flex:1"><label class="label">Your Niche</label><input class="inp" id="idea-niche" placeholder="e.g. fashion, fitness, food photography..."></div>
+              <button class="btn btn-p" onclick="genIdeas()">Generate Ideas</button>
+            </div>
+          </div>
+          <div id="ideas-grid" class="g3"><div class="muted">Enter niche above and click Generate.</div></div>
+        </div>
+
+        <!-- SCHEDULER -->
+        <div class="page" id="page-schedule">
+          <div class="sec-hdr"><span style="font-size:17px;font-weight:700">Post Queue</span><button class="btn btn-p btn-sm" onclick="nav('create',null)">+ Schedule New</button></div>
+          <div class="tabs">
+            <div class="tab active" onclick="filterQ('all',this)">All</div>
+            <div class="tab" onclick="filterQ('pending',this)">Pending</div>
+            <div class="tab" onclick="filterQ('posted',this)">Published</div>
+            <div class="tab" onclick="filterQ('failed',this)">Failed</div>
+          </div>
+          <div id="q-list"><span class="loader"></span></div>
+        </div>
+
+        <!-- AUDIENCE -->
+        <div class="page" id="page-audience">
+          <div class="g2">
+            <div class="card">
+              <div class="sec-title" style="margin-bottom:14px">Audience Analyzer</div>
+              <div class="fg"><label class="label">Niche / Industry</label><input class="inp" id="aud-niche" placeholder="e.g. sustainable fashion, crypto..."></div>
+              <div class="fg">
+                <label class="label">Location</label>
+                <div class="loc-wrap">
+                  <input class="inp" id="aud-loc" placeholder="Search location..." autocomplete="off" oninput="locSearch(this,'ld-aud')">
+                  <div class="loc-drop" id="ld-aud"></div>
+                </div>
+              </div>
+              <button class="btn btn-p btn-full" onclick="analyzeAud()">Analyze Audience</button>
+            </div>
+            <div class="card" id="aud-result">
+              <div class="ai-badge">✦ Audience Intelligence</div>
+              <div class="ai-box">Fill niche above and click Analyze.</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="sec-title" style="margin-bottom:12px">Optimal Posting Times</div>
+            <div id="aud-times" class="muted">Analyze your audience first.</div>
+          </div>
+        </div>
+
+        <!-- ANALYTICS -->
+        <div class="page" id="page-analytics">
+          <div class="g4">
+            <div class="stat p"><div class="stat-label">Followers</div><div class="stat-val" id="a-flw">—</div></div>
+            <div class="stat c"><div class="stat-label">Following</div><div class="stat-val" id="a-ing">—</div></div>
+            <div class="stat g"><div class="stat-label">Total Posts</div><div class="stat-val" id="a-med">—</div></div>
+            <div class="stat a"><div class="stat-label">AI Published</div><div class="stat-val" id="a-aip">—</div></div>
+          </div>
+          <div class="card">
+            <div class="sec-hdr"><span class="sec-title">Account Overview</span><button class="btn btn-g btn-sm" onclick="loadAnalytics()">Refresh</button></div>
+            <div id="analytics-body"><span class="loader"></span></div>
+          </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div class="page" id="page-settings">
+          <div class="g2">
+            <div>
+              <div class="card">
+                <div class="sec-title" style="margin-bottom:14px">🤖 AI Configuration</div>
+                <div class="fg">
+                  <label class="label">Groq API Key <span class="ks" id="ks-groq">checking...</span></label>
+                  <input class="inp" type="password" id="s-groq" placeholder="gsk_..." autocomplete="off">
+                  <div style="font-size:11px;color:var(--muted);margin-top:5px">Free at <strong style="color:var(--cyan)">console.groq.com</strong> — 14,400 requests/day free, no card</div>
+                </div>
+                <button class="btn btn-p btn-full" onclick="saveSettings()">Save Settings</button>
+              </div>
+              <div class="card">
+                <div class="sec-title" style="margin-bottom:14px">⚙️ Preferences</div>
+                <div class="fg"><label class="label">Timezone</label>
+                  <select class="sel" id="s-tz">
+                    <option>Asia/Kolkata</option><option>UTC</option><option>America/New_York</option>
+                    <option>America/Los_Angeles</option><option>Europe/London</option>
+                    <option>Asia/Dubai</option><option>Asia/Singapore</option>
+                  </select>
+                </div>
+                <div class="fg">
+                  <label class="label">Default Location</label>
+                  <div class="loc-wrap">
+                    <input class="inp" id="s-loc" placeholder="Search your city..." oninput="locSearch(this,'ld-settings')">
+                    <div class="loc-drop" id="ld-settings"></div>
+                  </div>
+                </div>
+                <button class="btn btn-g btn-full" onclick="saveSettings()">Save Preferences</button>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <div class="sec-title" style="margin-bottom:14px">📱 Connected Accounts</div>
+                <div id="s-accounts"><span class="loader"></span></div>
+                <button class="btn btn-g btn-full" style="margin-top:10px" onclick="startOAuth()">+ Connect Another Account</button>
+              </div>
+              <div class="card" style="font-size:12px;color:var(--muted);line-height:1.9">
+                <div class="sec-title" style="margin-bottom:10px">ℹ️ About</div>
+                <p>✓ Official Instagram OAuth — no password stored</p>
+                <p>✓ AI by Groq (free — 14,400 req/day)</p>
+                <p>✓ Location by OpenStreetMap (free)</p>
+                <p>✓ Multi-account support</p>
+                <p>✓ Anyone can use with their own account</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+const API = '';
+let me = null, tone = 'engaging', posts = [], filter = 'all';
+let genCap = '', genTags = '', locTimers = {};
+
+// ═══ INIT ═══════════════════════════════════════════
+window.onload = async () => {
+  // Set default schedule time
+  const dt = new Date(Date.now()+3600000); dt.setMinutes(0,0,0);
+  document.getElementById('c-time').value = new Date(dt - dt.getTimezoneOffset()*60000).toISOString().slice(0,16);
+
+  // Check URL params
+  const p = new URLSearchParams(location.search);
+  if (p.get('login') === 'success') { history.replaceState({},'','/'); }
+  if (p.get('error')) { showAuthErr(p.get('error')); history.replaceState({},'','/'); }
+
+  // Check settings
+  const cfg = await get('/api/settings').catch(()=>({}));
+  if (!cfg.ig_oauth_configured) {
+    document.getElementById('no-app-note').style.display = 'block';
+    document.getElementById('ig-btn').disabled = true;
+  }
+
+  // Check if logged in
+  const session = await get('/api/auth/me').catch(()=>({logged_in:false}));
+  if (session.logged_in) {
+    enterApp(session);
+  } else {
+    loadSavedAccounts();
+    document.getElementById('auth-screen').style.display = 'flex';
+  }
+};
+
+function showAuthErr(msg) {
+  const el = document.getElementById('auth-err');
+  const msgs = {
+    'oauth_denied': 'Login was cancelled. Please try again.',
+    'token_failed': 'Could not get access token. Check app credentials.',
+    'no_ig_business_account': 'No Instagram Business/Creator account found. Make sure your Instagram is a Business or Creator account linked to a Facebook Page.',
+  };
+  el.textContent = msgs[msg] || msg;
+  el.style.display = 'block';
+}
+
+async function loadSavedAccounts() {
+  const data = await get('/api/auth/users').catch(()=>({users:[]}));
+  if (!data.users?.length) return;
+  document.getElementById('saved-wrap').style.display = 'block';
+  document.getElementById('saved-list').innerHTML = data.users.map(u => `
+    <div class="saved-account" onclick="switchAcct('${u.ig_user_id}')">
+      <div class="saved-avatar">${u.username?.[0]?.toUpperCase()||'?'}</div>
+      <div class="saved-info">
+        <div class="saved-name">${u.full_name || u.username}</div>
+        <div class="saved-handle">@${u.username} ${u.followers ? '· '+fmt(u.followers)+' followers' : ''}</div>
+      </div>
+      <span class="saved-arrow">→</span>
+    </div>`).join('');
+}
+
+async function startOAuth() {
+  document.getElementById('ig-btn').disabled = true;
+  document.getElementById('oauth-note').style.display = 'block';
+  const data = await get('/api/oauth/url').catch(()=>({}));
+  if (data.url) { window.location.href = data.url; }
+  else {
+    showAuthErr(data.error || 'Could not start OAuth');
+    document.getElementById('ig-btn').disabled = false;
+    document.getElementById('oauth-note').style.display = 'none';
+  }
+}
+
+async function switchAcct(uid) {
+  const r = await post('/api/auth/switch', {ig_user_id: uid});
+  if (r.success) { const s = await get('/api/auth/me'); if (s.logged_in) enterApp(s); }
+}
+
+function enterApp(user) {
+  me = user;
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('sb-av').textContent = user.username?.[0]?.toUpperCase() || '?';
+  document.getElementById('sb-name').textContent = user.full_name || user.username;
+  document.getElementById('sb-handle').textContent = '@' + user.username;
+  document.getElementById('tb-handle').textContent = '@' + user.username;
+  document.getElementById('s-flw').textContent = fmt(user.followers || 0);
+  document.getElementById('s-med').textContent = fmt(user.media_count || 0);
+  loadDashboard();
+}
+
+// ═══ NAVIGATION ═════════════════════════════════════
+function nav(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  if (el) el.classList.add('active');
+  const titles = {dashboard:'Dashboard',account:'My Account',create:'AI Creator',ideas:'Content Ideas',
+                  schedule:'Scheduler',audience:'Audience AI',analytics:'Analytics',settings:'Settings'};
+  document.getElementById('page-title').textContent = titles[id] || id;
+  if (id==='dashboard') loadDashboard();
+  if (id==='account') { loadAccProfile(); loadMedia(); }
+  if (id==='schedule') loadQueue();
+  if (id==='analytics') loadAnalytics();
+  if (id==='settings') loadSettings();
+}
+
+// ═══ LOCATION SEARCH ════════════════════════════════
+function locSearch(inp, dropId) {
+  clearTimeout(locTimers[dropId]);
+  const val = inp.value.trim();
+  const drop = document.getElementById(dropId);
+  if (!val) { drop.classList.remove('open'); return; }
+  locTimers[dropId] = setTimeout(async () => {
+    const data = await get(`/api/location/search?q=${encodeURIComponent(val)}`).catch(()=>({results:[]}));
+    const r = data.results || [];
+    if (!r.length) { drop.classList.remove('open'); return; }
+    drop.innerHTML = r.map(loc=>`
+      <div class="loc-item" onclick="pickLoc('${loc.name.replace(/'/g,"\\'")}','${dropId}',this.closest('.loc-wrap').querySelector('input'))">
+        <div><div class="loc-name">📍 ${loc.name}</div><div class="loc-addr">${loc.full}</div></div>
+      </div>`).join('');
+    drop.classList.add('open');
+  }, 400);
+}
+function pickLoc(name, dropId, inp) {
+  if (inp) inp.value = name;
+  document.getElementById(dropId).classList.remove('open');
+}
+document.addEventListener('click', e=>{
+  document.querySelectorAll('.loc-drop').forEach(d=>{ if (!d.closest('.loc-wrap')?.contains(e.target)) d.classList.remove('open'); });
+});
+
+// ═══ DASHBOARD ══════════════════════════════════════
+async function loadDashboard() {
+  if (!me) return;
+  const data = await get('/api/schedule').catch(()=>({posts:[]}));
+  posts = data.posts || [];
+  document.getElementById('s-sch').textContent = posts.filter(p=>p.status==='pending').length;
+  document.getElementById('s-pub').textContent = posts.filter(p=>p.status==='posted').length;
+  const up = posts.filter(p=>p.status==='pending').slice(0,3);
+  document.getElementById('d-upcoming').innerHTML = up.length ? up.map(postRow).join('') : '<span class="muted">No upcoming posts.</span>';
+  loadBestTimes();
+}
+
+async function loadBestTimes() {
+  const el = document.getElementById('d-times');
+  el.innerHTML = '<span class="loader"></span>';
+  const data = await get('/api/ai/best-time', 'POST', {audience:'general',timezone:'Asia/Kolkata'}).catch(()=>({suggestions:[]}));
+  if (data.suggestions?.length) {
+    el.innerHTML = data.suggestions.map(s=>
+      `<span style="display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 12px;margin:3px;font-size:12px">
+        <strong style="color:var(--purple)">${s.day} ${s.time}</strong>
+        <span style="color:var(--muted);margin-left:5px;font-size:11px">${s.reason}</span>
+      </span>`).join('');
+  } else el.innerHTML = '<span class="muted">Add Groq API key in Settings to enable AI.</span>';
+}
+
+// ═══ ACCOUNT ════════════════════════════════════════
+async function loadAccProfile() {
+  const data = await get('/api/instagram/account').catch(()=>({error:'Failed'}));
+  const el = document.getElementById('acc-profile');
+  if (data.error) { el.innerHTML = `<div class="ai-box" style="color:var(--red)">${data.error}</div>`; return; }
+  el.innerHTML = `
+    <div class="profile-hdr">
+      <div class="profile-av">${data.username?.[0]?.toUpperCase()||'?'}</div>
+      <div>
+        <div style="font-size:17px;font-weight:700">${data.name||data.username}</div>
+        <div style="font-size:12px;color:var(--muted)">@${data.username}</div>
+        ${data.biography?`<div style="font-size:12px;color:var(--muted);margin-top:4px;max-width:400px">${data.biography}</div>`:''}
+        <div class="pstats">
+          <div><div class="pstat-v">${fmt(data.followers_count||0)}</div><div class="pstat-l">Followers</div></div>
+          <div><div class="pstat-v">${fmt(data.follows_count||0)}</div><div class="pstat-l">Following</div></div>
+          <div><div class="pstat-v">${fmt(data.media_count||0)}</div><div class="pstat-l">Posts</div></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function loadMedia() {
+  const el = document.getElementById('acc-media');
+  el.innerHTML = '<span class="loader"></span>';
+  const data = await get('/api/instagram/media').catch(()=>({data:[]}));
+  const media = data.data || [];
+  if (!media.length) { el.innerHTML = '<span class="muted">No posts found.</span>'; return; }
+  el.innerHTML = `<div class="media-grid">${media.map(m=>`
+    <a href="${m.permalink||'#'}" target="_blank" class="media-item">
+      <div style="font-size:18px;text-align:center;margin-bottom:7px">${m.media_type===2?'🎬':'🖼'}</div>
+      <div style="font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.caption||'(no caption)'}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:3px">♥ ${m.like_count||0} · 💬 ${m.comments_count||0}</div>
+    </a>`).join('')}</div>`;
+}
+
+// ═══ AI CREATOR ══════════════════════════════════════
+function setTone(el, t) {
+  document.querySelectorAll('#tone-chips .chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel'); tone = t;
+}
+
+async function genContent() {
+  const topic = document.getElementById('c-topic').value.trim();
+  if (!topic) { toast('Enter a topic first','error'); return; }
+  document.getElementById('ai-cap').innerHTML = '<span class="loader"></span> Writing with AI...';
+  document.getElementById('tag-wrap').innerHTML = '<span class="loader"></span>';
+  const loc = document.getElementById('c-loc').value;
+  const [capR, tagR] = await Promise.all([
+    post('/api/ai/caption', {topic, tone, audience: document.getElementById('c-audience').value||'general', location: loc}),
+    post('/api/ai/hashtags', {caption: topic, niche: document.getElementById('c-niche').value||topic, location: loc})
+  ]).catch(e => [{caption:'Error: '+e.message},{hashtags:''}]);
+  genCap = capR.caption || '';
+  document.getElementById('ai-cap').textContent = genCap;
+  genTags = tagR.hashtags || '';
+  const tags = genTags.split(' ').filter(t=>t.startsWith('#'));
+  document.getElementById('tag-wrap').innerHTML = tags.map(t=>`<span class="tag" onclick="this.classList.toggle('off')">${t}</span>`).join('');
+  toast('Content generated!','success');
+}
+
+async function schedPost() {
+  const time = document.getElementById('c-time').value;
+  if (!time) { toast('Pick a date/time','error'); return; }
+  if (!genCap) { toast('Generate content first','error'); return; }
+  const activeTags = [...document.querySelectorAll('#tag-wrap .tag:not(.off)')].map(t=>t.textContent).join(' ');
+  const r = await post('/api/schedule', {
+    image_url: document.getElementById('c-imgurl').value || '',
+    caption: genCap, hashtags: activeTags,
+    location: document.getElementById('c-loc').value,
+    scheduled_time: new Date(time).toISOString(),
+    post_type: document.getElementById('c-type').value.toLowerCase().replace(' ','_')
+  }).catch(e=>({error:e.message}));
+  r.post_id ? toast(`Scheduled for ${new Date(time).toLocaleString()}`,'success') : toast(r.error||'Failed','error');
+}
+
+async function postNow() {
+  if (!genCap) { toast('Generate content first','error'); return; }
+  const activeTags = [...document.querySelectorAll('#tag-wrap .tag:not(.off)')].map(t=>t.textContent).join(' ');
+  const r = await post('/api/instagram/post', {
+    image_url: document.getElementById('c-imgurl').value || '',
+    caption: genCap + '\n\n' + activeTags
+  }).catch(e=>({error:e.message}));
+  r.id ? toast('Posted to Instagram! 🎉','success') : toast(r.error||'Post failed','error');
+}
+
+function copy(id) { navigator.clipboard.writeText(document.getElementById(id).textContent).then(()=>toast('Copied!','success')); }
+function copyTags() {
+  const t = [...document.querySelectorAll('#tag-wrap .tag:not(.off)')].map(t=>t.textContent).join(' ');
+  navigator.clipboard.writeText(t).then(()=>toast('Hashtags copied!','success'));
+}
+
+// ═══ IDEAS ═══════════════════════════════════════════
+async function genIdeas() {
+  const niche = document.getElementById('idea-niche').value.trim();
+  if (!niche) { toast('Enter a niche','error'); return; }
+  const grid = document.getElementById('ideas-grid');
+  grid.innerHTML = '<div style="grid-column:1/-1"><span class="loader"></span> Generating ideas...</div>';
+  const data = await post('/api/ai/ideas', {niche}).catch(()=>({ideas:[]}));
+  const ideas = data.ideas || [];
+  if (!ideas.length) { grid.innerHTML = '<div class="muted" style="grid-column:1/-1">Could not generate ideas. Check Groq API key in Settings.</div>'; return; }
+  grid.innerHTML = ideas.map(idea=>`
+    <div class="idea" onclick="useIdea('${idea.title?.replace(/'/g,"\\'")||''}')">
+      <div class="idea-type ${(idea.type||'post').toLowerCase()}">${idea.type||'POST'}</div>
+      <div class="idea-title">${idea.title||''}</div>
+      <div class="idea-hook">${idea.hook||''}</div>
+      <div style="margin-top:8px"><span class="btn btn-g btn-sm">Use This →</span></div>
+    </div>`).join('');
+}
+
+function useIdea(title) {
+  nav('create',null); document.getElementById('c-topic').value = title; toast('Idea loaded!','info');
+}
+
+// ═══ SCHEDULER ═══════════════════════════════════════
+async function loadQueue() {
+  const data = await get('/api/schedule').catch(()=>({posts:[]}));
+  posts = data.posts || []; renderQueue();
+}
+function filterQ(f, el) {
+  filter = f;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderQueue();
+}
+function renderQueue() {
+  const el = document.getElementById('q-list');
+  const fp = filter==='all' ? posts : posts.filter(p=>p.status===filter);
+  if (!fp.length) { el.innerHTML = '<div class="muted" style="padding:24px;text-align:center">No posts in this view.</div>'; return; }
+  el.innerHTML = fp.map(p=>postRow(p,true)).join('');
+}
+function postRow(p, del=false) {
+  const dt = p.scheduled_time ? new Date(p.scheduled_time).toLocaleString() : '';
+  return `<div class="post-row">
+    <div class="post-icon">${p.post_type==='reel'?'🎬':p.post_type==='story'?'⭕':'🖼'}</div>
+    <div class="post-info">
+      <div class="post-cap">${p.caption||'(no caption)'}</div>
+      <div class="post-meta">${p.post_type} · ${dt} ${p.location?'· 📍'+p.location:''}</div>
+    </div>
+    <span class="badge ${p.status}">${p.status}</span>
+    ${del?`<button class="btn btn-d btn-sm" onclick="delPost(${p.id})">✕</button>`:''}
+  </div>`;
+}
+async function delPost(id) {
+  await fetch(`${API}/api/schedule/${id}`, {method:'DELETE'});
+  toast('Removed','info'); loadQueue();
+}
+
+// ═══ AUDIENCE ════════════════════════════════════════
+async function analyzeAud() {
+  const niche = document.getElementById('aud-niche').value.trim();
+  if (!niche) { toast('Enter a niche','error'); return; }
+  const el = document.getElementById('aud-result');
+  el.innerHTML = '<div class="ai-badge">✦ Audience Intelligence</div><div class="ai-box"><span class="loader"></span> Analyzing...</div>';
+  const loc = document.getElementById('aud-loc').value;
+  const [audR, timeR] = await Promise.all([
+    post('/api/ai/analyze-audience', {niche, location: loc}),
+    post('/api/ai/best-time', {audience: niche, timezone:'Asia/Kolkata'})
+  ]).catch(()=>[{analysis:{}},{suggestions:[]}]);
+  const a = audR.analysis || {};
+  el.innerHTML = `<div class="ai-badge">✦ Audience Intelligence</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+      <div><div class="label">Age Range</div><div style="font-size:13px;font-weight:600">${a.age_range||'—'}</div></div>
+      <div><div class="label">Gender</div><div style="font-size:13px;font-weight:600">${a.gender_split||'—'}</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="label">Top Interests</div>
+    <div class="chips">${(a.interests||[]).map(i=>`<span class="chip sel">${i}</span>`).join('')}</div>
+    <div class="divider"></div>
+    <div class="label">Pain Points</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.8">${(a.pain_points||[]).map(p=>`• ${p}`).join('<br>')}</div>
+    <div class="divider"></div>
+    <div class="label">Growth Tips</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.8">${(a.growth_tips||[]).map(t=>`✦ ${t}`).join('<br>')}</div>`;
+  if (timeR.suggestions?.length) {
+    document.getElementById('aud-times').innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px">${
+      timeR.suggestions.map(s=>`
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;min-width:130px">
+          <div style="font-weight:700;color:var(--purple);font-size:13px">${s.day}</div>
+          <div style="font-size:17px;font-weight:700;margin:3px 0">${s.time}</div>
+          <div style="font-size:11px;color:var(--muted)">${s.reason}</div>
+        </div>`).join('')
+    }</div>`;
+  }
+  toast('Done!','success');
+}
+
+// ═══ ANALYTICS ═══════════════════════════════════════
+async function loadAnalytics() {
+  const [acc, sched] = await Promise.all([
+    get('/api/instagram/account').catch(()=>({})),
+    get('/api/schedule').catch(()=>({posts:[]}))
+  ]);
+  document.getElementById('a-flw').textContent = fmt(acc.followers_count||0);
+  document.getElementById('a-ing').textContent = fmt(acc.follows_count||0);
+  document.getElementById('a-med').textContent = fmt(acc.media_count||0);
+  document.getElementById('a-aip').textContent = (sched.posts||[]).filter(p=>p.status==='posted').length;
+  document.getElementById('analytics-body').innerHTML = acc.username ?
+    `<div style="font-size:13px;color:var(--muted);line-height:1.9">
+      <p style="color:var(--green)">✓ Data loaded from Instagram</p>
+      <p>Profile: @${acc.username}</p>
+      ${acc.biography?`<p>Bio: ${acc.biography}</p>`:''}
+      <p>Refreshed: ${new Date().toLocaleTimeString()}</p>
+    </div>` : '<span class="muted">Could not load Instagram data.</span>';
+}
+
+// ═══ SETTINGS ════════════════════════════════════════
+async function loadSettings() {
+  const cfg = await get('/api/settings').catch(()=>({}));
+  const el = document.getElementById('ks-groq');
+  el.textContent = cfg.groq_configured ? '✓ Set' : '✗ Missing';
+  el.className = 'ks ' + (cfg.groq_configured ? 'ok' : 'no');
+  const users = await get('/api/auth/users').catch(()=>({users:[]}));
+  document.getElementById('s-accounts').innerHTML = (users.users||[]).map(u=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:7px">
+      <div class="ca-av">${u.username?.[0]?.toUpperCase()||'?'}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${u.full_name||u.username}</div>
+        <div style="font-size:11px;color:var(--muted)">@${u.username} ${u.followers?'· '+fmt(u.followers)+' followers':''}</div>
+      </div>
+      <button class="btn btn-g btn-sm" onclick="switchAcct('${u.ig_user_id}')">Switch</button>
+      <button class="btn btn-d btn-sm" onclick="doLogout('${u.ig_user_id}')">Out</button>
+    </div>`).join('') || '<span class="muted">No accounts connected.</span>';
+}
+
+async function saveSettings() {
+  toast('Settings saved locally (restart app to apply GROQ key)','info');
+}
+
+async function doLogout(uid) {
+  await post('/api/auth/logout', {});
+  me = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  loadSavedAccounts();
+  toast('Logged out','info');
+}
+
+// ═══ HELPERS ═════════════════════════════════════════
+async function get(path) {
+  const r = await fetch(API + path, {credentials:'include'});
+  if (!r.ok) throw new Error('HTTP '+r.status);
+  return r.json();
+}
+async function post(path, body) {
+  const r = await fetch(API + path, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body), credentials:'include'});
+  if (!r.ok) throw new Error('HTTP '+r.status);
+  return r.json();
+}
+function fmt(n) { return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':String(n||0); }
+function toast(msg, type='info') {
+  const c = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${{success:'✓',error:'✕',info:'✦'}[type]}</span><span>${msg}</span>`;
+  c.appendChild(t); setTimeout(()=>t.remove(), 3500);
+}
+</script>
+</body>
+</html>
