@@ -165,11 +165,11 @@ def oauth_url():
     redirect_uri = f"{BASE_URL}/api/oauth/callback"
     state = secrets.token_hex(16)
     session['oauth_state'] = state
-    # Use Instagram's native OAuth (for Instagram Business Login)
-    url = (f"https://www.instagram.com/oauth/authorize?"
-           f"force_reauth=true&client_id={IG_APP_ID}"
+    # Use Facebook OAuth dialog
+    url = (f"https://www.facebook.com/dialog/oauth?"
+           f"client_id={IG_APP_ID}"
            f"&redirect_uri={redirect_uri}"
-           f"&scope=instagram_basic,instagram_content_publish,instagram_manage_insights"
+           f"&scope=instagram_basic,instagram_content_publish,instagram_manage_insights,pages_show_list,pages_read_engagement"
            f"&response_type=code&state={state}")
     return jsonify({"url": url})
 
@@ -182,7 +182,7 @@ def oauth_callback():
         return redirect('/?error=oauth_denied')
     redirect_uri = f"{BASE_URL}/api/oauth/callback"
     # Exchange code for token
-    r = requests.post("https://api.instagram.com/oauth/access_token", data={
+    r = requests.post("https://graph.facebook.com/v19.0/oauth/access_token", data={
         "client_id": IG_APP_ID, "client_secret": IG_APP_SECRET,
         "redirect_uri": redirect_uri, "code": code
     }, timeout=10)
