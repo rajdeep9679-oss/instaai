@@ -111,14 +111,35 @@ def _get_long_lived_token(short_token):
     return r.json()
 
 def _get_ig_account(token):
-    """Get Instagram account info directly from token."""
+    """Get Instagram Business Account - try multiple approaches."""
+    # Try direct Instagram graph
     info = requests.get("https://graph.instagram.com/me", params={
         "fields": "id,username,name,followers_count,media_count,profile_picture_url,biography",
         "access_token": token
     }, timeout=10).json()
-    if "id" in info:
+    if "id" in info and "username" in info:
         info["page_token"] = token
         return [info]
+    # Try via Facebook pages
+    pages = _ig_get("/me/accounts", token, fields="id,name,access_token,instagram_business_account")
+    accounts = []
+    for page in pages.get("data", []):
+        ig = page.get("instagram_business_account")
+        if ig:
+            acc_info = _ig_get(f"/{ig['id']}", page["access_token"],
+                          fields="id,username,name,followers_count,media_count,profile_picture_url,biography")
+            acc_info["page_token"] = page["access_token"]
+            accounts.append(acc_info)
+    if accounts:
+        return accounts
+    # Try direct /me with Facebook token
+    me = _ig_get("/me", token, fields="id,name,instagram_business_account")
+    ig = me.get("instagram_business_account")
+    if ig:
+        acc_info = _ig_get(f"/{ig['id']}", token,
+                      fields="id,username,name,followers_count,media_count,profile_picture_url,biography")
+        acc_info["page_token"] = token
+        return [acc_info]
     return []
 
 # ── AI HELPER ──────────────────────────────────────────
@@ -157,15 +178,64 @@ def health():
     return jsonify({"status": "ok", "time": datetime.utcnow().isoformat()})
 
 # ── OAUTH ──────────────────────────────────────────────
+@app.route('/api/auth/token', methods=['POST'])
+def auth_token():
+    """Login with Instagram access token directly."""
+    d = request.json or {}
+    token = d.get('token','').strip()
+    if not token:
+        return jsonify({"success": False, "message": "No token provided"})
+    # Try to get account info with this token
+    accounts = _get_ig_account(token)
+    if not accounts:
+        # Try direct Instagram graph
+        r = requests.get("https://graph.instagram.com/me", params={
+            "fields": "id,username,name,followers_count,media_count,profile_picture_url,biography",
+            "access_token": token
+        }, timeout=10).json()
+        if "id" in r:
+            accounts = [{"id": r["id"], "username": r.get("username",""),
+                        "name": r.get("name",""), "followers_count": r.get("followers_count",0),
+                        "media_count": r.get("media_count",0),
+                        "profile_picture_url": r.get("profile_picture_url",""),
+                        "biography": r.get("biography",""), "page_token": token}]
+    if not accounts:
+        return jsonify({"success": False, "message": "Invalid token or could not fetch account. Make sure it is a valid Instagram Graph API token."})
+    acc = accounts[0]
+    db = Session()
+    try:
+        user = db.query(User).filter_by(ig_user_id=acc["id"]).first()
+        if not user:
+            user = User(ig_user_id=acc["id"])
+            db.add(user)
+        user.username      = acc.get("username","")
+        user.full_name     = acc.get("name","")
+        user.access_token  = acc.get("page_token", token)
+        user.token_expires = datetime.utcnow() + timedelta(days=60)
+        user.followers     = acc.get("followers_count",0)
+        user.media_count   = acc.get("media_count",0)
+        user.profile_pic   = acc.get("profile_picture_url","")
+        db.commit()
+        session['ig_user_id'] = acc["id"]
+        session['username']   = acc.get("username","")
+        return jsonify({"success": True, "username": acc.get("username",""),
+                       "full_name": acc.get("name",""), "followers": acc.get("followers_count",0),
+                       "media_count": acc.get("media_count",0),
+                       "profile_pic": acc.get("profile_picture_url",""),
+                       "ig_user_id": acc["id"]})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)})
+    finally:
+        db.close()
+
 @app.route('/api/oauth/url')
 def oauth_url():
-    """Generate Instagram OAuth URL."""
+    """Generate Instagram OAuth URL - kept for compatibility."""
     if not IG_APP_ID:
-        return jsonify({"error": "IG_APP_ID not configured. Add it in environment variables."})
+        return jsonify({"error": "IG_APP_ID not configured."})
     redirect_uri = f"{BASE_URL}/api/oauth/callback"
     state = secrets.token_hex(16)
     session['oauth_state'] = state
-    # Use Facebook OAuth dialog
     url = (f"https://www.facebook.com/dialog/oauth?"
            f"client_id={IG_APP_ID}"
            f"&redirect_uri={redirect_uri}"
